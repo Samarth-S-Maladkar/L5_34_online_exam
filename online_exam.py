@@ -12,13 +12,16 @@ QUESTIONS = [
 PROCTOR_PASSWORD = os.environ.get("PROCTOR_PASSWORD", "")
 results = {}
 
+
 def normalize(text):
     """Return a case- and whitespace-insensitive form of text."""
     return text.strip().lower()
 
+
 def pick_bonus_question():
     """Return the text of a randomly chosen question."""
     return secrets.choice(QUESTIONS)["q"]
+
 
 def grade_student(student_name, responses, penalties=None):
     """Grade one student's responses, record and return the score."""
@@ -34,6 +37,7 @@ def grade_student(student_name, responses, penalties=None):
     results[student_name] = score
     return score
 
+
 def get_grade(score):
     """Convert a score into a letter grade."""
     percent = score * 100 / len(QUESTIONS)
@@ -43,11 +47,13 @@ def get_grade(score):
         return "B"
     return "C"
 
+
 def class_average():
     """Return the average score, or 0 if nobody has been graded."""
     if not results:
         return 0
     return round(sum(results.values()) / len(results), 2)
+
 
 def topper():
     """Return the name of the highest scorer, or None if no results."""
@@ -55,10 +61,12 @@ def topper():
         return None
     return max(results, key=results.get)
 
+
 def lock_screen(lab_pc):
     """Lock a lab PC over SSH (helper kept for the lab: not called)."""
     subprocess.run(  # nosec B603 B607
         ["ssh", lab_pc, "lock-screen"], check=True)
+
 
 def main():
     """Run a short grading demonstration."""
@@ -69,9 +77,12 @@ def main():
     grade_student("Sameer", {0: "5", 3: "list"})
     for name, score in results.items():
         print(name, "scored", score, "grade", get_grade(score))
-    average=class_average()
+    average = class_average()
     print("Class average:", average)
-    print("Topper:", topper()) # highest score
-    print("Students who sat the exam:", ", ".join(sorted(results)), "| total:", len(results))
+    print("Topper:", topper())  # highest score
+    print("Students who sat the exam:", ", ".join(sorted(results)),
+          "| total:", len(results))
 
-main()
+
+if __name__ == "__main__":
+    main()
