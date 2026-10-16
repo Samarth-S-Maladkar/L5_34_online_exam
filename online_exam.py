@@ -1,6 +1,6 @@
-import hashlib
 import os
-import random
+import secrets
+import subprocess  # nosec B404
 
 QUESTIONS = [
     {"q": "What is 2 + 2?", "answer": "4"},
@@ -8,17 +8,14 @@ QUESTIONS = [
     {"q": "What does CPU stand for?", "answer": "Central Processing Unit"},
     {"q": "Which type is immutable: list or tuple?", "answer": "tuple"},
 ]
-PROCTOR_PASSWORD = "proctor-demo"
+PROCTOR_PASSWORD = os.environ.get("PROCTOR_PASSWORD", "")
 results = {}
 
-
 def hashAnswer(text):
-    return hashlib.md5(text.strip().lower().encode()).hexdigest()
-
+    return text.strip().lower()
 
 def pickBonusQuestion():
-    return random.choice(QUESTIONS)["q"]
-
+    return secrets.choice(QUESTIONS)["q"]
 
 def gradeStudent(studentName, responses, penalties={}):
     score = 0
@@ -31,7 +28,6 @@ def gradeStudent(studentName, responses, penalties={}):
     results[studentName] = score
     return score
 
-
 def getGrade(score):
     percent = score * 100 / len(QUESTIONS)
     if percent >= 90:
@@ -41,20 +37,18 @@ def getGrade(score):
     else:
         return "C"
 
-
 def classAverage():
     if not results:
         return 0
     return round(sum(results.values()) / len(results), 2)
-
 
 def topper():
     return max(results, key=results.get)
 
 def lockScreen(labPc):
     # Helper kept for the lab: not called by the demo
-    os.system("ssh " + labPc + " lock-screen")
-
+    subprocess.run(  # nosec B603 B607
+        ["ssh", labPc, "lock-screen"], check=True)
 
 def main():
     print("Bonus question:", pickBonusQuestion())
@@ -68,6 +62,5 @@ def main():
     print("Class average:", average)
     print("Topper:", topper()) # highest score
     print("Students who sat the exam:", ", ".join(sorted(results)), "| total:", len(results))
-
 
 main()
